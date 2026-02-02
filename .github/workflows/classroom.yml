@@ -1,0 +1,53 @@
+name: Autograding Tests
+on:
+  - push
+  - repository_dispatch
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Test Directory Listing
+      id: test-directory-listing
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test Directory Listing
+        setup-command: ''
+        command: "./test_directory-listing.sh"
+        timeout: 10
+
+    - name: Test Backup File
+      id: test-backup-file
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test Backup File
+        setup-command: ''
+        command: "./test_backup-file.sh"
+        timeout: 10
+
+    - name: Test Backup Directory
+      id: test-backup-directory
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test Backup Directory
+        setup-command: ''
+        command: "./test_backup-directory.sh"
+        timeout: 10
+
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-DIRECTORY-LISTING_RESULTS: "${{steps.test-directory-listing.outputs.result}}"
+        TEST-BACKUP-FILE_RESULTS: "${{steps.test-backup-file.outputs.result}}"
+        TEST-BACKUP-DIRECTORY_RESULTS: "${{steps.test-backup-directory.outputs.result}}"
+      with:
+        runners: test-directory-listing,test-backup-file,test-backup-directory
